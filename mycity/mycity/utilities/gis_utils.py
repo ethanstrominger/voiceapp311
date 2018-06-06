@@ -6,10 +6,9 @@ kill any computation that takes longer than 3 secs.
 
 
 """
-
 from arcgis.features import FeatureLayer
 
-import mycity.mycity.utilities.google_maps_utils as g_maps_utils
+import mycity.utilities.google_maps_utils as g_maps_utils
 
 
 def get_closest_feature(origin, feature_address_index, 
