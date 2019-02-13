@@ -1,7 +1,6 @@
 import unittest
 from collections import namedtuple
 
-from arcgis import GIS
 from pyproj import Proj, transform
 
 ESRI_SPATIAL_REFERENCE = 3857
@@ -17,11 +16,6 @@ LongLat = namedtuple("LongLat", ("long", "lat"))
 
 # TODO https://esri.github.io/arcgis-python-api/apidoc/html/arcgis.geometry.html#project
 
-
-from arcgis.geometry import project
-
-
-GIS()
 
 class MyCityPoint(object):
     def __init__(self, x, y, spatial_reference):
@@ -46,11 +40,9 @@ class MyCityPoint(object):
             return self.x, self.y
         in_proj = Proj(init='epsg:{}'.format(self.spatial_reference))
         out_proj = Proj(init='epsg:{}'.format(spatial_reference))
-        geometry = [{'x': self.x, 'y': self.y}]
-        answer = project(geometry, in_sr=self.spatial_reference, out_sr=spatial_reference)
+        answer = transform(in_proj, out_proj, self.x, self.y)
         print(answer)
         return answer
-        # return transform(in_proj, out_proj, self.x, self.y)
 
 
 class TestPoint(unittest.TestCase):
