@@ -8,7 +8,7 @@ import requests
 import mycity.utilities.arcgis_utils as au
 
 address = '399 Boylston st., Boston, MA'
-params = {'f': 'json', 'singleLine': address, 'outFields': 'Match_addr,Addr_type'}
+params = {'f': 'json', 'singleLine': address, 'outFields': '*', 'geometry': 'true'}
 
 test_answer = requests.get(au.ARCGIS_GEOCODE_URL, params=params)
 
