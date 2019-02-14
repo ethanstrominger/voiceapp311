@@ -8,6 +8,7 @@ from mycity.mycity.test.test_our_stuff.test_distance import Mile
 # import mycity.test.test_our_stuff.test_long_lat
 from mycity.mycity.test.test_our_stuff.test_long_lat import LongLatPoint
 
+
 ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
 
 """
@@ -84,7 +85,8 @@ LAT_LONG_SPATIAL_REFERENCE = 4326
 
 
 class ArcGisGroceryRequest(object):
-    arc_gis_url = ARCGIS_GROCERY_URL
+    ARCGIS_MILE_UNIT = "esriSRUnit_StatuteMile"
+    ARC_GIS_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
 
     def __init__(self, origin_point: LongLatPoint):
         self._origin_point = origin_point
@@ -98,10 +100,9 @@ class ArcGisGroceryRequest(object):
             "returnGeometry": "false",
             "outFields": "Store, Address, Type, Lat, Lon, Neighborho",
             "distance": distance.value,
-            "units": "esriSRUnit_StatuteMile"
+            "units": self.ARCGIS_MILE_UNIT
         }
-        response = requests.get(self.arc_gis_url, params=params)
-        print(response.json())
+        response = requests.get(self.ARC_GIS_URL, params=params)
         return response.json()['features']
 
 
