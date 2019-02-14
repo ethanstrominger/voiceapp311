@@ -4,6 +4,9 @@ from typing import List, Dict
 
 import requests
 
+from mycity.test.test_our_stuff.test_distance import Mile
+from mycity.test.test_our_stuff.test_long_lat import LongLatPoint
+
 ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
 
 """
@@ -30,7 +33,7 @@ ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/s
 
 
 # TODO use below to create days agenda and look for things to add to list
-
+# TODO: Complete other parts of the flow from the Google doc (address stuff and forming the voice response)
 # TODO review code logic
 # TODO distance as a parameter to get_grocery_store_api_response
 # TODO discuss using mocks for "requests"
@@ -76,63 +79,29 @@ def get_add_distances_to_api_response(origin, grocery_store_api_response):
 ACTUAL_BOSTON_GROCERY_STORE_ESRI_COORDINATES = {"x": -7919027.0821751533, "y": 5215208.1759242024}
 
 ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES = (-71.0793703469, 42.3481798771)
-
-
-class LongLatPoint(object):
-    def __init__(self, long: float, lat: float):
-        self._long = long
-        self._lat = lat
-
-    @property
-    def long(self):
-        return self._long
-
-    @property
-    def lat(self):
-        return self._lat
-
-    @property
-    def x(self):
-        return self._long
-
-    @property
-    def y(self):
-        return self._lat
-
-
-class TestLongLatPoint(unittest.TestCase):
-    def test_init(self):
-        long = 30.123
-        lat = 60.123
-        point = LongLatPoint(long, lat)
-        self.assertEqual(point.long, long)
-        self.assertEqual(point.lat, lat)
-
-    def test_xy_properties(self):
-        long = 30.123
-        lat = 60.123
-        point = LongLatPoint(long, lat)
-        self.assertEqual(point.x, long)
-        self.assertEqual(point.y, lat)
-
-
-class Mile(object):
-    def __init__(self, value: float):
-        self.value = value
-
-
-class TestMile(unittest.TestCase):
-    def test_mile(self):
-        miles = 3.0
-        mile = Mile(miles)
-        self.assertEqual(mile.value, miles)
+LAT_LONG_SPATIAL_REFERENCE = 4326
 
 
 class ArcGisGroceryRequest(object):
     arc_gis_url = ARCGIS_GROCERY_URL
 
     def __init__(self, origin_point: LongLatPoint):
-        pass
+        self._origin_point = origin_point
+
+    def get_nearby(self, distance):
+        params = {
+            "f": "json",
+            "inSR": LAT_LONG_SPATIAL_REFERENCE,
+            "geometry": f"{self._origin_point.x},{self._origin_point.y}",
+            "geometryType": "esriGeometryPoint",
+            "returnGeometry": "false",
+            "outFields": "Store, Address, Type, Lat, Lon, Neighborho",
+            "distance": distance.value,
+            "units": "esriSRUnit_StatuteMile"
+        }
+        response = requests.get(self.arc_gis_url, params=params)
+        print(response.json())
+        return response.json()['features']
 
 
 class TestGroceryStoreIntent(unittest.TestCase):
@@ -142,10 +111,11 @@ class TestGroceryStoreIntent(unittest.TestCase):
     def test_get_grocery_store_api_response(self):
         origin_point = LongLatPoint(*ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES)
         grocery_request = ArcGisGroceryRequest(origin_point)
-        # miles = Mile(0.5)
-        # response = grocery_request.get_nearby(miles)
-        # self.assertIsInstance(response, list)
-        # self.assertIsInstance(response[0], dict)
+        miles = Mile(0.5)
+        response = grocery_request.get_nearby(miles)
+        print(response)
+        self.assertIsInstance(response, list)
+        self.assertIsInstance(response[0], dict)
 
     def test_get_grocery_store_api_response_has_correct_attributes(self):
         expected_attribute_keys = sorted(('Address',
