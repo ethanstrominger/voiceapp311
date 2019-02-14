@@ -4,8 +4,9 @@ from typing import List, Dict
 
 import requests
 
-from mycity.test.test_our_stuff.test_distance import Mile
-from mycity.test.test_our_stuff.test_long_lat import LongLatPoint
+from mycity.mycity.test.test_our_stuff.test_distance import Mile
+# import mycity.test.test_our_stuff.test_long_lat
+from mycity.mycity.test.test_our_stuff.test_long_lat import LongLatPoint
 
 ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
 
