@@ -45,30 +45,6 @@ ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/s
 # TODO error_handling response.json()['features'] == []
 
 
-def get_grocery_store_api_response(longlat_coordinates: LongLatPoint):
-    """
-
-    :param xy_coordinates: esriGeometryPoint is NOT lat/lon
-    :return:
-    """
-    # access_token = generate_access_token()
-    grocery_url = ARCGIS_GROCERY_URL
-    # grocery_token_url = "https://services.arcgis.com/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
-
-    distance = "0.5"
-    params = {
-        "f": "json",
-        # "token": access_token,
-        "geometry": f"{longlat_coordinates.long},{longlat_coordinates.lat}",
-        "geometryType": "esriGeometryPoint",
-        "inSR": 4326,
-        "returnGeometry": "false",
-        "outFields": "Store, Address, Type, Lat, Lon, Neighborho",
-        "distance": distance,
-        "units": "esriSRUnit_StatuteMile"
-    }
-    response = requests.request("GET", grocery_url, params=params)
-    return response.json()['features']
 
 
 def get_stripped_api_response(initial_response):
@@ -127,6 +103,13 @@ class TestGroceryStoreIntent(unittest.TestCase):
     #     self.test_request = MyCityRequestDataModel()
 
     def test_get_grocery_store_api_response(self):
+        expected_attribute_keys = sorted(('Address',
+                                          'Lat',
+                                          'Lon',
+                                          'Neighborho',
+                                          'Store',
+                                          'Type'))
+
         origin_point = ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES
         grocery_request = ArcGisGroceryRequest(origin_point)
         miles = Mile(0.5)
@@ -134,19 +117,11 @@ class TestGroceryStoreIntent(unittest.TestCase):
         # print(response)
         self.assertIsInstance(response, list)
         self.assertIsInstance(response[0], dict)
-
-    def test_get_grocery_store_api_response_has_correct_attributes(self):
-        expected_attribute_keys = sorted(('Address',
-                                          'Lat',
-                                          'Lon',
-                                          'Neighborho',
-                                          'Store',
-                                          'Type'))
-        response = get_grocery_store_api_response(ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES)
         first_json_element = response[0]
         actual_attributes = first_json_element['attributes']
         actual_attribute_keys = sorted(actual_attributes.keys())
         self.assertEqual(expected_attribute_keys, actual_attribute_keys)
+
 
     def test_get_stripped_api_response(self):
         initial_response = [{'attributes': {'test': 'other_thing'}},
