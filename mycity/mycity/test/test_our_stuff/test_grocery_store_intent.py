@@ -98,7 +98,7 @@ LAT_LONG_SPATIAL_REFERENCE = 4326
 
 class ArcGisGroceryRequest(object):
     ARCGIS_MILE_UNIT = "esriSRUnit_StatuteMile"
-    ARC_GIS_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
+    _arc_gis_url = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
     _out_fields = "Store, Address, Type, Lat, Lon, Neighborho"
 
     def __init__(self, origin_point: LongLatPoint):
@@ -118,7 +118,7 @@ class ArcGisGroceryRequest(object):
         #     "distance": distance.value,
         #     "units": self.ARCGIS_MILE_UNIT
         # }
-        response = requests.get(self.ARC_GIS_URL, params=params)
+        response = requests.get(self._arc_gis_url, params=params)
         # print (response)
         return response.json()['features']
 
@@ -157,11 +157,12 @@ class TestGroceryStoreIntent(unittest.TestCase):
 
     def test_add_distances_to_api_response(self):
         # Test is that distance is added to the grocery store api response with a number to both records
+        # Setup
         mock_origin = ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES
         mock_grocery_store_api_response = [
             {'Address': '370 Western Avenue',
-             'Lat': 42.3609803747,
-             'Lon': -71.137830016,
+             'Lat': mock_origin.lat,
+             'Lon': mock_origin.long,
              'Neighborho': 'Allston',
              'Store': 'Star Market',
              'Type': 'Supermarket'},
@@ -172,21 +173,18 @@ class TestGroceryStoreIntent(unittest.TestCase):
              'Store': 'Super Stop & Shop',
              'Type': 'Supermarket'}
         ]
+        # make a copy of mock response which gets modified
         original_mock_grocery_store_api_response = copy.deepcopy(mock_grocery_store_api_response)
 
+        # Add distance to the mock_grocery_store_api_response object
         add_distances_to_api_response(mock_origin, mock_grocery_store_api_response)
+
+        # Set a variable to be copy of the new response without distance
         mock_grocery_store_api_response_without_distance = copy.deepcopy(mock_grocery_store_api_response)
         del mock_grocery_store_api_response_without_distance[0]['distance_in_miles']
         del mock_grocery_store_api_response_without_distance[1]['distance_in_miles']
+
+        # Do the tests
         self.assertEqual(original_mock_grocery_store_api_response, mock_grocery_store_api_response_without_distance)
-        print(mock_grocery_store_api_response)
-        # print ("A")
-        # print (mock_grocery_store_api_response)
-        # print("B")
-
-        # self.assertEqual(expected_result, actual_result)
-
-    # def test_get_grocery_store_locations(self):
-    #
-    #     locations = get_grocery_store_locations(self.test_request)
-    #     expected = []
+        self.assertEqual(mock_grocery_store_api_response[0]['distance_in_miles'],0)
+        self.assertGreater(mock_grocery_store_api_response[1]['distance_in_miles'],0)
