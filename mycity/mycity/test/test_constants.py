@@ -1,6 +1,7 @@
 import os
 
 # CSV files for testing location_util's csv functions
+
 PARKING_LOTS_TEST_CSV = os.path.join(
     os.getcwd(),
     "mycity/test/test_data/Snow_Emergency_Parking.csv"
