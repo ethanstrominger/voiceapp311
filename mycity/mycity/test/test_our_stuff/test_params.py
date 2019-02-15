@@ -1,37 +1,11 @@
 import unittest
 
-from mycity.test.test_our_stuff.test_long_lat import LongLatPoint
+from mycity.test.test_our_stuff.arc_gis_params import ArcGisParams
+from mycity.test.test_our_stuff.longlat import LongLatPoint
 
 # TODO: Remove duplication, also in test_grocery_store_intent, 4326 duplicated
 # TODO: Add distance and outfields as optional parameters - to be decided if part of __init__ or not
-from mycity.test.test_our_stuff.test_distance import Distance, Mile
-
-
-class ArcGisParams(object):
-    LAT_LONG_SPATIAL_REFERENCE = 4326
-    MILE_UNIT = "esriSRUnit_StatuteMile"
-    DEFAULT_QUERY_DISTANCE = 0.5
-
-    def __init__(
-            self,
-            origin: LongLatPoint,
-            distance: Distance = Mile(DEFAULT_QUERY_DISTANCE),
-            out_fields: str = "*"
-    ):
-        self.origin = origin
-        self.url_param = {
-            "f": "json",
-            "inSR": self.LAT_LONG_SPATIAL_REFERENCE,
-            "geometry": f"{self.origin.x},{self.origin.y}",
-            "geometryType": "esriGeometryPoint",
-            "returnGeometry": "false",
-            "outFields": out_fields,
-            "distance": distance.mile,
-            "units": self.MILE_UNIT
-        }
-
-    def url_params(self):
-        return self.url_param
+from mycity.test.test_our_stuff.distance import Mile
 
 
 class TestParams(unittest.TestCase):

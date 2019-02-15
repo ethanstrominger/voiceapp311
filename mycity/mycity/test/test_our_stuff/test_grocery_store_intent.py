@@ -1,39 +1,14 @@
 import copy
 import unittest
 # from mycity.utilities.arcgis_utils import get
-from typing import List, Dict
 
-import requests
-
-from mycity.test.test_our_stuff.test_distance import Mile, Distance
+from mycity.test.test_our_stuff.arc_gis_grocery_request import ArcGisGroceryRequest
+from mycity.test.test_our_stuff.new_util import add_distances_to_api_response
+from mycity.test.test_our_stuff.distance import Mile
 # import mycity.test.test_our_stuff.test_long_lat
-from mycity.test.test_our_stuff.test_long_lat import LongLatPoint
-from mycity.test.test_our_stuff.test_params import ArcGisParams
-from mycity.utilities.gis_utils import calculate_distance
+from mycity.test.test_our_stuff.longlat import LongLatPoint
 
 ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
-
-"""
-{'features': [{'attributes': {'Address': '370 Western Avenue',
-                              'Lat': 42.3609803747,
-                              'Lon': -71.137830016,
-                              'Neighborho': 'Allston',
-                              'Store': 'Star Market',
-                              'Type': 'Supermarket'}},
-              {'attributes': {'Address': '60 Everett Street',
-                              'Lat': 42.3565404365,
-                              'Lon': -71.1392297503,
-                              'Neighborho': 'Allston',
-                              'Store': 'Super Stop & Shop',
-                              'Type': 'Supermarket'}},
-              {'attributes': {'Address': '424 CAMBRIDGE ST',
-                              'Lat': 42.3544598312,
-                              'Lon': -71.1344004323,
-                              'Neighborho': 'Allston',
-                              'Store': 'Bazaar on Cambridge St',
-                              'Type': 'Supermarket'}}]
-
-"""
 
 
 # TODO use below to create days agenda and look for things to add to list
@@ -45,21 +20,7 @@ ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/s
 # TODO error_handling response.json()['features'] == []
 
 
-
-
-def get_stripped_api_response(initial_response):
-    return [element['attributes'] for element in initial_response]
-
-
-def add_distances_to_api_response(origin, grocery_store_api_response:List):
-    # print("A===")
-    # print(grocery_store_api_response)
-    for store_json in grocery_store_api_response:
-        # print("B===")
-        # print(store_json)
-        # destination = LongLatPoint(store_json2.lon,store_json2.lat)
-        destination = LongLatPoint(store_json["Lon"],store_json["Lat"])
-        store_json['distance_in_miles'] = Distance.get_distance(origin,destination).mile
+MOCK_STAR_MARKET_LONGLAT_POINT = LongLatPoint(-71.137830016, 42.3609803747)
 
 
 ############################################################################ TESTS START HERE
@@ -67,36 +28,8 @@ def add_distances_to_api_response(origin, grocery_store_api_response:List):
 # TODO: Can we get rid of ESTRI coordinate test and just do long lat?
 # ACTUAL_BOSTON_GROCERY_STORE_ESRI_COORDINATES = {"x": -7919027.0821751533, "y": 5215208.1759242024}
 
-ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES = LongLatPoint(-71.137830016, 42.3609803747)
-
 LAT_LONG_SPATIAL_REFERENCE = 4326
 
-
-class ArcGisGroceryRequest(object):
-    ARCGIS_MILE_UNIT = "esriSRUnit_StatuteMile"
-    _arc_gis_url = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
-    _out_fields = "Store, Address, Type, Lat, Lon, Neighborho"
-
-    def __init__(self, origin_point: LongLatPoint):
-        self._origin_point = origin_point
-
-
-    def get_nearby(self, distance):
-        params = ArcGisParams (self._origin_point,distance,self._out_fields).url_param
-        # params = ArcGisParams (self._origin_point,Mile(0.5),"*").url_param
-        # {
-        #     "f": "json",
-        #     "inSR": LAT_LONG_SPATIAL_REFERENCE,
-        #     "geometry": f"{self._origin_point.x},{self._origin_point.y}",
-        #     "geometryType": "esriGeometryPoint",
-        #     "returnGeometry": "false",
-        #     "outFields": self._out_fields,
-        #     "distance": distance.value,
-        #     "units": self.ARCGIS_MILE_UNIT
-        # }
-        response = requests.get(self._arc_gis_url, params=params)
-        # print (response)
-        return response.json()['features']
 
 class TestGroceryStoreIntent(unittest.TestCase):
     # def setUp(self):
@@ -110,7 +43,7 @@ class TestGroceryStoreIntent(unittest.TestCase):
                                           'Store',
                                           'Type'))
 
-        origin_point = ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES
+        origin_point = MOCK_STAR_MARKET_LONGLAT_POINT
         grocery_request = ArcGisGroceryRequest(origin_point)
         miles = Mile(0.5)
         response = grocery_request.get_nearby(miles)
@@ -127,13 +60,13 @@ class TestGroceryStoreIntent(unittest.TestCase):
         initial_response = [{'attributes': {'test': 'other_thing'}},
                             {'attributes': {'test': 'thing'}}]
         expected = [{'test': 'other_thing'}, {'test': 'thing'}]
-        actual = get_stripped_api_response(initial_response)
+        actual = ArcGisGroceryRequest.get_stripped_api_response(initial_response)
         self.assertEqual(expected, actual)
 
     def test_add_distances_to_api_response(self):
         # Test is that distance is added to the grocery store api response with a number to both records
         # Setup
-        mock_origin = ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES
+        mock_origin = MOCK_STAR_MARKET_LONGLAT_POINT
         mock_grocery_store_api_response = [
             {'Address': '370 Western Avenue',
              'Lat': mock_origin.lat,
