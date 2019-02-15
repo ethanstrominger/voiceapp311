@@ -45,7 +45,7 @@ ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/s
 # TODO error_handling response.json()['features'] == []
 
 
-def get_grocery_store_api_response(xy_coordinates: dict) -> List[Dict]:
+def get_grocery_store_api_response(longlat_coordinates: LongLatPoint):
     """
 
     :param xy_coordinates: esriGeometryPoint is NOT lat/lon
@@ -59,8 +59,9 @@ def get_grocery_store_api_response(xy_coordinates: dict) -> List[Dict]:
     params = {
         "f": "json",
         # "token": access_token,
-        "geometry": f"{xy_coordinates['x']},{xy_coordinates['y']}",
+        "geometry": f"{longlat_coordinates.long},{longlat_coordinates.lat}",
         "geometryType": "esriGeometryPoint",
+        "inSR": 4326,
         "returnGeometry": "false",
         "outFields": "Store, Address, Type, Lat, Lon, Neighborho",
         "distance": distance,
@@ -88,7 +89,7 @@ def add_distances_to_api_response(origin, grocery_store_api_response:List):
 ############################################################################ TESTS START HERE
 
 # TODO: Can we get rid of ESTRI coordinate test and just do long lat?
-ACTUAL_BOSTON_GROCERY_STORE_ESRI_COORDINATES = {"x": -7919027.0821751533, "y": 5215208.1759242024}
+# ACTUAL_BOSTON_GROCERY_STORE_ESRI_COORDINATES = {"x": -7919027.0821751533, "y": 5215208.1759242024}
 
 ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES = LongLatPoint(-71.137830016, 42.3609803747)
 
@@ -141,7 +142,7 @@ class TestGroceryStoreIntent(unittest.TestCase):
                                           'Neighborho',
                                           'Store',
                                           'Type'))
-        response = get_grocery_store_api_response(ACTUAL_BOSTON_GROCERY_STORE_ESRI_COORDINATES)
+        response = get_grocery_store_api_response(ACTUAL_BOSTON_GROCERY_STORE_LONGLAT_COORDINATES)
         first_json_element = response[0]
         actual_attributes = first_json_element['attributes']
         actual_attribute_keys = sorted(actual_attributes.keys())
