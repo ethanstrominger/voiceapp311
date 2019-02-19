@@ -12,23 +12,12 @@ class ArcGisGroceryRequest(object):
     def __init__(self, origin_point: LongLatPoint):
         self._origin_point = origin_point
 
+    @staticmethod
     def get_stripped_api_response(initial_response):
         return [element['attributes'] for element in initial_response]
 
 
     def get_nearby(self, distance):
         params = ArcGisParams (self._origin_point,distance,self._out_fields).url_param
-        # params = ArcGisParams (self._origin_point,from_miles(0.5),"*").url_param
-        # {
-        #     "f": "json",
-        #     "inSR": LAT_LONG_SPATIAL_REFERENCE,
-        #     "geometry": f"{self._origin_point.x},{self._origin_point.y}",
-        #     "geometryType": "esriGeometryPoint",
-        #     "returnGeometry": "false",
-        #     "outFields": self._out_fields,
-        #     "distance": distance.value,
-        #     "units": self.ARCGIS_MILE_UNIT
-        # }
         response = requests.get(self._arc_gis_url, params=params)
-        # print (response)
         return response.json()['features']
