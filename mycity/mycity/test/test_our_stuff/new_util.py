@@ -12,4 +12,4 @@ def add_distances_to_api_response(origin, grocery_store_api_response:List):
         # print(store_json)
         # destination = LongLatPoint(store_json2.lon,store_json2.lat)
         destination = LongLatPoint(store_json["Lon"],store_json["Lat"])
-        store_json['distance_in_miles'] = Distance.get_distance(origin,destination).mile
+        store_json['distance_in_miles'] = Distance.get_distance(origin,destination).miles

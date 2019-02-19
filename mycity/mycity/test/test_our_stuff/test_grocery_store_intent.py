@@ -3,9 +3,8 @@ import unittest
 # from mycity.utilities.arcgis_utils import get
 
 from mycity.test.test_our_stuff.arc_gis_grocery_request import ArcGisGroceryRequest
+from mycity.test.test_our_stuff.distance import Distance
 from mycity.test.test_our_stuff.new_util import add_distances_to_api_response
-from mycity.test.test_our_stuff.distance import Mile
-# import mycity.test.test_our_stuff.test_long_lat
 from mycity.test.test_our_stuff.longlat import LongLatPoint
 
 ARCGIS_GROCERY_URL = "https://services.arcgis.com/sFnw0xNflSi8J0uh/ArcGIS/rest/services/Supermarkets_GroceryStores/FeatureServer/0/query"
@@ -45,7 +44,7 @@ class TestGroceryStoreIntent(unittest.TestCase):
 
         origin_point = MOCK_STAR_MARKET_LONGLAT_POINT
         grocery_request = ArcGisGroceryRequest(origin_point)
-        miles = Mile(0.5)
+        miles = Distance.from_miles(0.5)
         response = grocery_request.get_nearby(miles)
         # print(response)
         self.assertIsInstance(response, list)

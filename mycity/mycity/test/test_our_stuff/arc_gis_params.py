@@ -1,4 +1,4 @@
-from mycity.test.test_our_stuff.distance import Distance, Mile
+from mycity.test.test_our_stuff.distance import Distance
 from mycity.test.test_our_stuff.longlat import LongLatPoint
 
 
@@ -10,7 +10,7 @@ class ArcGisParams(object):
     def __init__(
             self,
             origin: LongLatPoint,
-            distance: Distance = Mile(DEFAULT_QUERY_DISTANCE),
+            distance: Distance = Distance.from_miles(DEFAULT_QUERY_DISTANCE),
             out_fields: str = "*"
     ):
         self.origin = origin
@@ -21,7 +21,7 @@ class ArcGisParams(object):
             "geometryType": "esriGeometryPoint",
             "returnGeometry": "false",
             "outFields": out_fields,
-            "distance": distance.mile,
+            "distance": distance.miles,
             "units": self.MILE_UNIT
         }
 

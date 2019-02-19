@@ -18,7 +18,7 @@ class ArcGisGroceryRequest(object):
 
     def get_nearby(self, distance):
         params = ArcGisParams (self._origin_point,distance,self._out_fields).url_param
-        # params = ArcGisParams (self._origin_point,Mile(0.5),"*").url_param
+        # params = ArcGisParams (self._origin_point,from_miles(0.5),"*").url_param
         # {
         #     "f": "json",
         #     "inSR": LAT_LONG_SPATIAL_REFERENCE,

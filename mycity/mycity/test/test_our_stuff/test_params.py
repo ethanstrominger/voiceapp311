@@ -1,11 +1,11 @@
 import unittest
 
 from mycity.test.test_our_stuff.arc_gis_params import ArcGisParams
+from mycity.test.test_our_stuff.distance import Distance
 from mycity.test.test_our_stuff.longlat import LongLatPoint
 
 # TODO: Remove duplication, also in test_grocery_store_intent, 4326 duplicated
 # TODO: Add distance and outfields as optional parameters - to be decided if part of __init__ or not
-from mycity.test.test_our_stuff.distance import Mile
 
 
 class TestParams(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestParams(unittest.TestCase):
             "distance": miles,
             "units": "esriSRUnit_StatuteMile"
         }
-        distance = Mile(miles)
+        distance = Distance.from_miles(miles)
         params = ArcGisParams(origin, distance)
         actual_params = params.url_params()
         self.assertEqual(expected_params, actual_params)
@@ -62,7 +62,7 @@ class TestParams(unittest.TestCase):
             "distance": ArcGisParams.DEFAULT_QUERY_DISTANCE,
             "units": "esriSRUnit_StatuteMile"
         }
-        distance = Mile(miles)
+        distance = Distance.from_miles(miles)
         params = ArcGisParams(origin=origin, out_fields="field1,field2,field3")
         actual_params = params.url_params()
         self.assertEqual(expected_params, actual_params)
